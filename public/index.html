@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tungku – Monitoring Suhu Insinerator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#e3e5eb;--p0:#f1f1f2;--p1:#ffffff;--p2:#f1f1f2;--hl:#222226;--tx:#1d1d1f;--mu:#7b7b83;--ln:#dedee2;--ink:#ffffff;--red:#d93a2f;--yel:#f0d44a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.shell{position:relative;max-width:1360px;margin:16px auto;background:var(--p0);border-radius:32px;display:grid;grid-template-columns:230px 1fr}
+.rings{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none}
+.rings i{position:absolute;border:1px solid var(--ln);border-radius:50%;opacity:.55}
+.rings i:nth-child(1){width:640px;height:640px;right:-180px;top:260px}
+.rings i:nth-child(2){width:360px;height:360px;left:140px;top:900px}
+aside{position:sticky;top:0;align-self:start;height:100vh;padding:32px 20px;display:flex;flex-direction:column;border-right:1px solid var(--ln);z-index:1}
+.logo{font-size:22px;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:10px;margin:0 8px 40px}
+.logo svg{width:28px;height:28px}
+nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.nb{background:none;border:0;text-align:left;padding:12px 16px;border-radius:14px;color:var(--mu);cursor:pointer;font-size:15px;letter-spacing:.03em;display:flex;gap:12px;align-items:center}
+.nb:hover{color:var(--tx)}
+.nb.on{background:var(--p1);color:var(--tx)}
+.nb:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,tr[tabindex]:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+main{padding:32px 36px 40px;position:relative;z-index:1;min-width:0}
+header{display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+h1{margin:0;font-size:30px;font-weight:500;letter-spacing:.03em;margin-right:auto}
+.pill{background:var(--p1);border:1px solid var(--ln);border-radius:14px;padding:10px 14px;color:var(--mu);font-size:13px}
+select,input{background:var(--p0);border:1px solid var(--ln);border-radius:12px;padding:10px 12px;width:100%}
+header select{width:auto;min-width:220px;background:var(--p1)}
+.view{display:none}.view.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
+.card{background:var(--p1);border-radius:28px;padding:24px;min-width:0;box-shadow:0 1px 3px rgba(30,30,40,.06);position:relative;overflow:hidden}
+.card:not(.tbl){min-height:420px}
+.stats{display:grid;gap:12px}
+.stats div{background:var(--p2);border-radius:20px;padding:16px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.stats b{font-size:28px;font-weight:600}
+.nb{transition:background .3s,color .3s}
+.card h2{margin:0;font-size:18px;font-weight:500;letter-spacing:.03em}
+.sub{color:var(--mu);font-size:13px;margin:2px 0 14px}
+.c4{grid-column:span 4}.c5,.c7{grid-column:span 6}.c8{grid-column:span 8}.c12{grid-column:span 12}
+.hl{background:var(--hl);color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;min-height:340px}
+.hl .sub{color:#a9a9b0}
+.big{font-size:56px;font-weight:600;letter-spacing:-.02em;line-height:1.05}
+.big small{font-size:24px;font-weight:400}
+.chip{display:inline-block;padding:3px 12px;border-radius:99px;font-size:12px;border:1px solid currentColor;white-space:nowrap}
+.chip.low{background:var(--yel);color:#1d1d1f;border-color:var(--yel)}
+.chip.high{background:var(--red);color:#fff;border-color:var(--red)}
+.chip.off{border-style:dashed;color:var(--mu)}
+.gauge{position:relative;height:10px;border-radius:9px;background:rgba(255,255,255,.18);margin:18px 0 8px}
+.gauge .z{position:absolute;top:0;bottom:0;background:rgba(255,255,255,.4);border-radius:9px}
+.gauge .m{position:absolute;top:-5px;width:4px;height:20px;background:var(--ink);border-radius:3px;transition:left .6s}
+.gl{display:flex;justify-content:space-between;font-size:12px;color:#a9a9b0}
+svg text{fill:var(--mu);font-family:inherit;font-size:11px}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-weight:400;color:var(--mu);font-size:12px;text-align:left;padding:8px 10px}
+td{padding:12px 10px;border-top:1px solid var(--ln)}
+tr[data-id]{cursor:pointer}tr[data-id]:hover td{background:var(--p2)}
+td small{display:block;color:var(--mu)}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:14px;font-size:13px;color:var(--mu)}
+.lg b{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}
+.log{list-style:none;margin:0;padding:0}
+.log li{display:flex;gap:16px;padding:11px 0;border-top:1px solid var(--ln)}
+.log time{color:var(--mu);width:72px;flex:none}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
+.full{grid-column:1/-1}
+.btn{background:var(--hl);color:var(--ink);border:0;border-radius:14px;padding:12px 22px;cursor:pointer;font-weight:500}
+.btn:hover{background:#3b3b41}
+.note{color:var(--mu);font-size:12px;margin-top:6px}
+code{background:var(--p2);padding:2px 7px;border-radius:7px;font-size:12px}
+.dv{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:8px}
+.dv div{background:var(--p2);border-radius:20px;padding:18px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--tx);color:var(--ink);padding:12px 20px;border-radius:14px;opacity:0;pointer-events:none;transition:.3s;z-index:9}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1180px){.c4,.c8{grid-column:span 6}}
+@media(max-width:900px){
+ .shell{grid-template-columns:1fr;margin:0;border-radius:0}
+ aside{position:static;height:auto;flex-direction:row;align-items:center;padding:16px;border-right:0;border-bottom:1px solid var(--ln);overflow-x:auto;gap:8px}
+ .logo{margin:0 8px 0 0}nav{flex-direction:row;flex:none}.out{display:none}
+ main{padding:20px 16px 32px}
+ .c4,.c5,.c7,.c8{grid-column:span 12}.form{grid-template-columns:1fr}.card:not(.tbl){min-height:0}
+ .big{font-size:46px}
+}
+@media(prefers-reduced-motion:reduce){.gauge .m,.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+ <div class="rings" aria-hidden="true"><i data-d="40"></i><i data-d="-70"></i></div>
+ <aside>
+  <div class="logo"><svg viewBox="0 0 32 32" fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linecap="round"><circle cx="16" cy="16" r="5"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5M7 7l3.5 3.5M21.5 21.5L25 25M25 7l-3.5 3.5M10.5 21.5L7 25"/></svg>Tungku</div>
+  <nav>
+   <button class="nb on" data-v="dash">Dashboard</button>
+   <button class="nb" data-v="devs">Insinerator</button>
+   <button class="nb" data-v="set">Pengaturan</button>
+  </nav>
+  <button class="nb out" type="button">Keluar</button>
+ </aside>
+ <main>
+  <header>
+   <h1 id="ttl">Dashboard</h1>
+   <select id="sel" aria-label="Pilih insinerator"></select>
+   <span class="pill" id="pill">Menghubungkan…</span>
+  </header>
+
+  <section class="view on" id="v-dash">
+   <div class="grid">
+    <div class="card hl c4" data-speed="0.5">
+     <div><h2 id="hn">–</h2><p class="sub" id="hl">–</p></div>
+     <div>
+      <div class="big" id="ht">–</div>
+      <div style="margin-top:8px" id="hs"></div>
+      <div class="gauge"><div class="z" id="gz"></div><div class="m" id="gm"></div></div>
+      <div class="gl"><span id="g1"></span><span id="g2"></span></div>
+     </div>
+    </div>
+    <div class="card c8" data-speed="1.2">
+     <h2>Grafik suhu</h2><p class="sub">60 pembacaan terakhir. Area terang adalah rentang optimal.</p>
+     <svg id="ch" viewBox="0 0 640 280" width="100%" role="img" aria-label="Grafik suhu insinerator"></svg>
+    </div>
+    <div class="card c12 tbl" data-speed="0.8" style="order:9">
+     <h2>Semua insinerator</h2><p class="sub">Klik baris untuk melihat grafiknya.</p>
+     <div class="tw"><table><thead><tr><th>Nama</th><th>ID perangkat</th><th>Suhu</th><th>Batas optimal</th><th>Status</th></tr></thead><tbody id="tb"></tbody></table></div>
+    </div>
+    <div class="card c4" data-speed="1.5">
+     <h2>Waktu per zona</h2><p class="sub">Insinerator terpilih, sejak aplikasi dibuka.</p>
+     <svg id="dn" viewBox="0 0 200 200" width="100%" style="max-width:220px;display:block;margin:auto" role="img" aria-label="Proporsi waktu per zona suhu"></svg>
+     <div class="lg"><span><b style="background:#1d1d1f"></b>Optimal <i id="zo"></i></span><span><b style="background:#d93a2f"></b>Terlalu panas <i id="zh"></i></span><span><b style="background:#f0d44a"></b>Kurang panas <i id="zl"></i></span></div>
+    </div>
+    <div class="card c4" data-speed="0.7">
+     <h2>Kejadian terakhir</h2><p class="sub">Suhu keluar batas dan perubahan status perangkat.</p>
+     <ul class="log" id="lg"></ul>
+    </div>
+    <div class="card c4" data-speed="1.0">
+     <h2>Ringkasan</h2><p class="sub">Kondisi seluruh insinerator saat ini.</p>
+     <div class="stats" id="st"></div>
+    </div>
+   </div>
+  </section>
+
+  <section class="view" id="v-devs">
+   <div class="grid">
+    <div class="card c5" data-speed="0.6">
+     <h2>Daftarkan insinerator</h2><p class="sub">Satu alat dengan satu sensor suhu.</p>
+     <div class="form" id="fm">
+      <div class="full"><label for="fn">Nama insinerator</label><input id="fn" placeholder="Contoh: Insinerator RS Harapan"></div>
+      <div class="full"><label for="fl">Lokasi</label><input id="fl" placeholder="Kota atau alamat"></div>
+      <div class="full"><label for="fi">ID perangkat</label><input id="fi" placeholder="INS-004"><p class="note">Topik MQTT: <code id="tp">insinerator/…/suhu</code></p></div>
+      <div><label for="fa">Batas bawah (°C)</label><input id="fa" type="number" value="850"></div>
+      <div><label for="fb">Batas atas (°C)</label><input id="fb" type="number" value="1100"></div>
+      <div class="full"><button class="btn" id="add" type="button">Daftarkan</button></div>
+     </div>
+    </div>
+    <div class="card c7" data-speed="1.3">
+     <h2>Insinerator terdaftar</h2><p class="sub" id="dc"></p>
+     <div class="dv" id="dl"></div>
+    </div>
+   </div>
+  </section>
+
+  <section class="view" id="v-set">
+   <div class="grid">
+    <div class="card c5" data-speed="0.6">
+     <h2>Batas suhu optimal</h2><p class="sub">Diatur per insinerator. Status dihitung dari dua angka ini.</p>
+     <div class="form">
+      <div class="full"><label for="ss">Insinerator</label><select id="ss"></select></div>
+      <div><label for="sa">Batas bawah (°C)</label><input id="sa" type="number"></div>
+      <div><label for="sb">Batas atas (°C)</label><input id="sb" type="number"></div>
+      <div class="full"><button class="btn" id="sv" type="button">Simpan batas</button></div>
+     </div>
+    </div>
+    <div class="card c7" data-speed="1.3">
+     <h2>Cara status dihitung</h2>
+     <p class="sub">Suhu di bawah batas bawah: Kurang panas. Di antara kedua batas: Optimal. Di atas batas atas: Terlalu panas. Tanpa data lebih dari 15 detik: Offline.</p>
+     <p class="note">Nilai awal hanyalah contoh. Angka sebenarnya menunggu masukan dosen.</p>
+    </div>
+   </div>
+  </section>
+ </main>
+</div>
+<div class="toast" id="ts" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const fmt=n=>n.toFixed(1).replace(".",",");
+const KEY={"Kurang panas":"low","Optimal":"ok","Terlalu panas":"high"};
+let devs=[],logs=[],cur=null;
+const hhmm=ts=>new Date(ts).toLocaleTimeString("id-ID");
+const status=d=>!d.on||d.t==null?"Offline":d.t<d.min?"Kurang panas":d.t>d.max?"Terlalu panas":"Optimal";
+const chip=d=>{const s=status(d);return `<span class="chip ${s==="Offline"?"off":s==="Optimal"?"":KEY[s]}">${s}</span>`};
+const adopt=s=>({id:s.id,name:s.name,loc:s.loc,min:s.min,max:s.max,t:s.t,on:s.online,hist:s.hist||[],z:s.zones});
+const api=async(m,u,b)=>{const r=await fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Permintaan gagal");return j};
+function connect(){
+ const ws=new WebSocket((location.protocol==="https:"?"wss://":"ws://")+location.host+"/ws");
+ ws.onopen=()=>$("#pill").textContent="Server terhubung";
+ ws.onclose=()=>{$("#pill").textContent="Server terputus, mencoba lagi…";setTimeout(connect,2000)};
+ ws.onmessage=e=>{const m=JSON.parse(e.data);
+  if(m.type==="snapshot"){devs=m.devices.map(adopt);logs=m.events.map(v=>({t:hhmm(v.ts),m:v.msg}));
+   if(!devs.some(x=>x.id===cur))cur=devs[0]?devs[0].id:null;
+   $("#pill").textContent=m.mqtt?"Server dan MQTT terhubung":"Server terhubung, MQTT belum";opts();render()}
+  else if(m.type==="reading"){const d=devs.find(x=>x.id===m.id);if(d){d.t=m.t;d.on=true;d.z=m.zones;d.hist.push(m.t);if(d.hist.length>60)d.hist.shift();render()}}
+  else if(m.type==="device"){const n=adopt(m.device),i=devs.findIndex(x=>x.id===n.id);if(i<0)devs.push(n);else devs[i]=n;if(!cur)cur=n.id;opts();render()}
+  else if(m.type==="remove"){devs=devs.filter(x=>x.id!==m.id);if(cur===m.id)cur=devs[0]?devs[0].id:null;opts();render()}
+  else if(m.type==="event"){logs.unshift({t:hhmm(m.ts),m:m.msg});if(logs.length>5)logs.pop();render()}};
+}
+
+function render(){
+ const d=devs.find(x=>x.id===cur)||devs[0];
+ if(!d){$("#hn").textContent="Belum ada insinerator";$("#hl").textContent="Daftarkan di menu Insinerator";$("#ht").textContent="–";$("#hs").innerHTML="";$("#tb").innerHTML="";$("#lg").innerHTML="";stats();return}
+ $("#hn").textContent=d.name;$("#hl").textContent=`${d.loc}, ${d.id}`;
+ $("#ht").innerHTML=d.t==null?"Tidak ada data":`${fmt(d.t)}<small>°C</small>`;
+ $("#hs").innerHTML=chip(d);
+ const lo=d.min-150,hi=d.max+150,p=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100));
+ $("#gz").style.cssText=`left:${p(d.min)}%;width:${p(d.max)-p(d.min)}%`;
+ $("#gm").style.left=d.t==null?"0%":`calc(${p(d.t)}% - 2px)`;$("#gm").style.opacity=d.t==null?0:1;
+ $("#g1").textContent=`Batas bawah ${d.min}°C`;$("#g2").textContent=`Batas atas ${d.max}°C`;
+ chart(d);donut(d);stats();
+ $("#tb").innerHTML=devs.map(x=>`<tr data-id="${x.id}" tabindex="0"><td>${x.name}<small>${x.loc}</small></td><td>${x.id}</td><td>${x.t==null?"–":fmt(x.t)+"°C"}</td><td>${x.min} sampai ${x.max}°C</td><td>${chip(x)}</td></tr>`).join("");
+ $("#lg").innerHTML=logs.map(l=>`<li><time>${l.t}</time><span>${l.m}</span></li>`).join("");
+}
+function stats(){
+ const on=devs.filter(x=>x.on),ok=on.filter(x=>status(x)==="Optimal").length,bad=on.length-ok;
+ $("#st").innerHTML=`<div><span>Perangkat online</span><b>${on.length}/${devs.length}</b></div><div><span>Dalam rentang optimal</span><b>${ok}</b></div><div><span>Perlu perhatian</span><b${bad?' style="color:var(--red)"':""}>${bad}</b></div>`;
+}
+function chart(d){
+ const W=640,H=280,L=48,svg=$("#ch");
+ if(!d.hist.length){svg.innerHTML=`<text x="320" y="140" text-anchor="middle" style="font-size:14px">Perangkat offline, belum ada data.</text>`;return}
+ const lo=Math.min(d.min,...d.hist)-60,hi=Math.max(d.max,...d.hist)+60,y=v=>H-24-(v-lo)/(hi-lo)*(H-40);
+ const n=d.hist.length,x=i=>L+(60-n+i)*(W-L-10)/59;
+ let g="";
+ for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;g+=`<line x1="${L}" x2="${W-10}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e4e8" stroke-width=".8"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${Math.round(v)}</text>`}
+ g+=`<rect x="${L}" y="${y(d.max)}" width="${W-L-10}" height="${y(d.min)-y(d.max)}" fill="#1d1d1f" opacity=".06"/>`;
+ g+=`<line x1="${L}" x2="${W-10}" y1="${y(d.max)}" y2="${y(d.max)}" stroke="#8e8e97" stroke-dasharray="4 4"/><line x1="${L}" x2="${W-10}" y1="${y(d.min)}" y2="${y(d.min)}" stroke="#8e8e97" stroke-dasharray="4 4"/>`;
+ g+=`<polyline fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linejoin="round" points="${d.hist.map((v,i)=>x(i)+","+y(v)).join(" ")}"/>`;
+ g+=`<circle cx="${x(n-1)}" cy="${y(d.hist[n-1])}" r="5" fill="#d93a2f"/>`;
+ svg.innerHTML=g;
+}
+function donut(d){
+ const z=d.z,tot=z.low+z.ok+z.high||1,R=70,C=2*Math.PI*R;let off=0,s=`<g transform="rotate(-90 100 100)">`;
+ [["ok","#1d1d1f"],["high","#d93a2f"],["low","#f0d44a"]].forEach(([k,c])=>{const f=z[k]/tot*C;s+=`<circle cx="100" cy="100" r="${R}" fill="none" stroke="${c}" stroke-width="22" stroke-dasharray="${f} ${C-f}" stroke-dashoffset="${-off}"/>`;off+=f});
+ s+=`</g><text x="100" y="106" text-anchor="middle" style="font-size:22px;fill:#1d1d1f;font-weight:500">${Math.round(z.ok/tot*100)}%</text><text x="100" y="124" text-anchor="middle">optimal</text>`;
+ $("#dn").innerHTML=s;
+ $("#zo").textContent=Math.round(z.ok/tot*100)+"%";$("#zh").textContent=Math.round(z.high/tot*100)+"%";$("#zl").textContent=Math.round(z.low/tot*100)+"%";
+}
+function opts(){
+ const h=devs.map(d=>`<option value="${d.id}">${d.name}</option>`).join("");
+ $("#sel").innerHTML=h;$("#sel").value=cur;$("#ss").innerHTML=h;$("#ss").value=cur;fillSet();
+ $("#dc").textContent=`${devs.length} alat terdaftar`;
+ $("#dl").innerHTML=devs.map(d=>`<div><b>${d.name}</b><p class="sub" style="margin:2px 0 10px">${d.loc}</p>${chip(d)}<p class="note">ID <code>${d.id}</code><br>Topik <code>insinerator/${d.id}/suhu</code><br>Batas ${d.min} sampai ${d.max}°C</p><button class="nb" data-del="${d.id}" type="button" style="border:1px solid var(--ln);padding:6px 14px;margin-top:10px">Hapus</button></div>`).join("");
+}
+function fillSet(){const d=devs.find(x=>x.id===$("#ss").value);if(d){$("#sa").value=d.min;$("#sb").value=d.max}}
+function toast(t){const e=$("#ts");e.textContent=t;e.classList.add("on");clearTimeout(toast.k);toast.k=setTimeout(()=>e.classList.remove("on"),2600)}
+
+/* animasi */
+const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
+gsap.registerPlugin(ScrollTrigger);
+function motion(){
+ ScrollTrigger.getAll().forEach(t=>t.kill());
+ const v=$$(".view.on [data-speed]");
+ if(calm)return;
+ gsap.from(v,{opacity:0,scale:.95,clipPath:"inset(0% 0% 100% 0% round 28px)",duration:.9,stagger:.1,ease:"power3.out",clearProps:"opacity,scale,clipPath"});
+ gsap.from(".view.on .dv>div,.view.on .form>div",{opacity:0,x:-18,duration:.5,stagger:.05,delay:.4,ease:"power2.out",clearProps:"opacity,x"});
+ v.forEach(el=>{const s=+el.dataset.speed;gsap.fromTo(el.children,{y:-12*s},{y:12*s,ease:"none",scrollTrigger:{trigger:el,start:"top bottom",end:"bottom top",scrub:.7}})});
+ ScrollTrigger.refresh();
+}
+if(!calm)addEventListener("pointermove",e=>{const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
+ gsap.to(".rings i",{x:(i,el)=>x*el.dataset.d,y:(i,el)=>y*el.dataset.d,duration:1.4,ease:"power3.out"})});
+
+/* hover kartu: hanya naik, tanpa miring */
+if(!calm)$$(".card").forEach(c=>{
+ const mouse=e=>e.pointerType==="mouse";
+ c.addEventListener("pointerenter",e=>{if(!mouse(e)||c.matches(":focus-within"))return;gsap.to(c,{y:-8,boxShadow:"0 22px 46px rgba(30,30,40,.16)",duration:.4,ease:"power3.out",overwrite:"auto"})});
+ c.addEventListener("pointerleave",()=>gsap.to(c,{y:0,boxShadow:"0 1px 3px rgba(30,30,40,.06)",duration:.5,ease:"power3.out",overwrite:"auto"}));
+ c.addEventListener("focusin",()=>gsap.to(c,{y:0,duration:.3,overwrite:"auto"}));
+});
+
+/* navigasi */
+const T={dash:"Dashboard",devs:"Insinerator",set:"Pengaturan"};
+let busy=false;
+$$(".nb[data-v]").forEach(b=>b.onclick=()=>{
+ const id="v-"+b.dataset.v,old=$(".view.on");
+ if(busy||old.id===id)return;
+ $$(".nb").forEach(x=>x.classList.toggle("on",x===b));
+ const go=()=>{
+  $$(".view").forEach(x=>x.classList.toggle("on",x.id===id));
+  $("#ttl").textContent=T[b.dataset.v];$("#sel").style.display=b.dataset.v==="dash"?"":"none";
+  scrollTo(0,0);motion();
+  if(!calm)gsap.fromTo("#ttl",{opacity:0,x:28},{opacity:1,x:0,duration:.6,ease:"power3.out"});
+ };
+ if(calm){go();return}
+ busy=true;
+ gsap.fromTo(b,{scale:.9},{scale:1,duration:.55,ease:"back.out(3)"});
+ gsap.to("#ttl",{opacity:0,x:-20,duration:.2});
+ const oc=old.querySelectorAll(".card");
+ gsap.to(oc,{opacity:0,scale:.95,duration:.22,stagger:.03,ease:"power1.in",onComplete:()=>{gsap.set(oc,{clearProps:"opacity,scale"});go();busy=false}});
+});
+$("#sel").onchange=e=>{cur=e.target.value;render()};
+$("#tb").onclick=e=>{const r=e.target.closest("tr");if(r){cur=r.dataset.id;$("#sel").value=cur;render()}};
+$("#tb").onkeydown=e=>{if(e.key==="Enter")e.target.click()};
+$("#ss").onchange=fillSet;
+$("#fi").oninput=e=>$("#tp").textContent=`insinerator/${e.target.value||"…"}/suhu`;
+$("#sv").onclick=async()=>{const id=$("#ss").value,a=+$("#sa").value,b=+$("#sb").value;
+ if(!id)return;if(!(a<b))return toast("Batas bawah harus lebih kecil dari batas atas");
+ try{await api("PUT","/api/devices/"+id,{min:a,max:b});toast("Batas suhu disimpan")}catch(e){toast(e.message)}};
+$("#add").onclick=async()=>{const n=$("#fn").value.trim(),l=$("#fl").value.trim(),i=$("#fi").value.trim().toUpperCase(),a=+$("#fa").value,b=+$("#fb").value;
+ if(!n||!i)return toast("Isi nama dan ID perangkat");
+ if(!(a<b))return toast("Batas bawah harus lebih kecil dari batas atas");
+ try{await api("POST","/api/devices",{id:i,name:n,loc:l,min:a,max:b});
+  ["#fn","#fl","#fi"].forEach(x=>$(x).value="");$("#tp").textContent="insinerator/…/suhu";toast("Terdaftar. Menunggu data pertama dari alat…")}catch(e){toast(e.message)}};
+$("#dl").onclick=async e=>{const b=e.target.closest("[data-del]");if(!b||!confirm("Hapus "+b.dataset.del+"?"))return;
+ try{await api("DELETE","/api/devices/"+b.dataset.del);toast("Insinerator dihapus")}catch(x){toast(x.message)}};
+
+opts();render();motion();connect();
+</script>
+</body>
+</html>

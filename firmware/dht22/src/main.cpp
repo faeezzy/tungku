@@ -3,9 +3,9 @@
 #include <PubSubClient.h>
 #include <DHT.h>
 
-const char *WIFI_SSID = "Kavling3Lt3_AP2";
-const char *WIFI_PASS = "embunpagiputri11111";
-const char *MQTT_HOST = "192.168.110.165"; // IP laptop kamu (cek: ipconfig → IPv4)
+const char *WIFI_SSID = "..";
+const char *WIFI_PASS = "...";
+const char *MQTT_HOST = "192.168.x.x"; // IP laptop kamu (cek: ipconfig → IPv4)
 const int MQTT_PORT = 1883;
 const char *DEVICE_ID = "DHT-001"; // huruf besar, harus sama dengan yang didaftarkan di web
 

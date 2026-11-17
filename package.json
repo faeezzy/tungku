@@ -1,0 +1,15 @@
+{
+  "name": "tungku-monitoring",
+  "version": "0.1.0",
+  "description": "Monitoring suhu insinerator: ESP32 -> MQTT -> Node.js -> Web",
+  "main": "server.js",
+  "scripts": { "start": "node server.js", "sim": "node simulator.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "aedes": "^0.51.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mqtt": "^5.10.1",
+    "ws": "^8.18.0"
+  }
+}

@@ -1,0 +1,12 @@
+# Opsional: broker Mosquitto sungguhan. Jalankan: docker compose up -d
+# Lalu di .env set EMBEDDED_BROKER=false
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports: ["1883:1883"]
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mqdata:/mosquitto/data
+    restart: unless-stopped
+volumes:
+  mqdata:
