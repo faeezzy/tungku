@@ -8,110 +8,191 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:light;--bg:#e3e5eb;--p0:#f1f1f2;--p1:#ffffff;--p2:#f1f1f2;--hl:#222226;--tx:#1d1d1f;--mu:#7b7b83;--ln:#dedee2;--ink:#ffffff;--red:#d93a2f;--yel:#f0d44a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/*
+ Bahasa visual:
+ - TIMBUL (.tap): latar putih, border, bayangan, kursor tangan, naik saat hover, mengecil saat ditekan  -> bisa dipencet
+ - CEKUNG (input/select): latar abu, bayangan ke dalam                                              -> bisa diisi / dipilih
+ - DATAR (.card, .st, .live): tanpa bayangan, tanpa hover                                           -> hanya informasi
+*/
+:root{color-scheme:light;
+ --ash:#e4e5ea;--panel:#f3f3f5;--paper:#ffffff;--char:#1f1f23;--tx:#1d1d1f;--mu:#74747c;--ln:#dcdce1;
+ --ember:#d93a2f;--flame:#f0c93a;--ink:#ffffff;
+ --raise:0 1px 0 rgba(255,255,255,.9) inset,0 1px 2px rgba(30,30,40,.08),0 4px 10px rgba(30,30,40,.06);
+ --raise-hi:0 1px 0 rgba(255,255,255,.9) inset,0 2px 4px rgba(30,30,40,.08),0 12px 24px rgba(30,30,40,.12);
+ --sink:inset 0 1px 3px rgba(30,30,40,.10);
+ box-sizing:border-box}
 *,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5}
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{margin:0;background:var(--ash);color:var(--tx);font-family:"Lexend",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.5;-webkit-tap-highlight-color:transparent}
 button,input,select{font:inherit;color:inherit}
-.shell{position:relative;max-width:1360px;margin:16px auto;background:var(--p0);border-radius:32px;display:grid;grid-template-columns:230px 1fr}
-.rings{position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none}
-.rings i{position:absolute;border:1px solid var(--ln);border-radius:50%;opacity:.55}
-.rings i:nth-child(1){width:640px;height:640px;right:-180px;top:260px}
-.rings i:nth-child(2){width:360px;height:360px;left:140px;top:900px}
-aside{position:sticky;top:0;align-self:start;height:100vh;padding:32px 20px;display:flex;flex-direction:column;border-right:1px solid var(--ln);z-index:1}
+
+/* ---------- latar parallax ---------- */
+.bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg i{position:absolute;border:1px solid #d2d3da;border-radius:50%}
+.bg i:nth-child(1){width:760px;height:760px;right:-220px;top:180px}
+.bg i:nth-child(2){width:420px;height:420px;left:-120px;top:620px}
+.bg i:nth-child(3){width:220px;height:220px;right:30%;top:-60px}
+.bg b{position:absolute;width:620px;height:620px;left:40%;top:420px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.7),transparent);filter:blur(10px)}
+
+.shell{position:relative;z-index:1;max-width:1360px;margin:16px auto;background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(6px);border-radius:32px;display:grid;grid-template-columns:230px 1fr}
+aside{position:sticky;top:0;align-self:start;height:100vh;padding:32px 20px;display:flex;flex-direction:column;border-right:1px solid var(--ln);z-index:3}
 .logo{font-size:22px;font-weight:600;letter-spacing:.04em;display:flex;align-items:center;gap:10px;margin:0 8px 40px}
 .logo svg{width:28px;height:28px}
-nav{display:flex;flex-direction:column;gap:6px;flex:1}
-.nb{background:none;border:0;text-align:left;padding:12px 16px;border-radius:14px;color:var(--mu);cursor:pointer;font-size:15px;letter-spacing:.03em;display:flex;gap:12px;align-items:center}
-.nb:hover{color:var(--tx)}
-.nb.on{background:var(--p1);color:var(--tx)}
-.nb:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,tr[tabindex]:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
-main{padding:32px 36px 40px;position:relative;z-index:1;min-width:0}
-header{display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap}
-h1{margin:0;font-size:30px;font-weight:500;letter-spacing:.03em;margin-right:auto}
-.pill{background:var(--p1);border:1px solid var(--ln);border-radius:14px;padding:10px 14px;color:var(--mu);font-size:13px}
-select,input{background:var(--p0);border:1px solid var(--ln);border-radius:12px;padding:10px 12px;width:100%}
-header select{width:auto;min-width:220px;background:var(--p1)}
+nav{position:relative;display:flex;flex-direction:column;gap:6px;flex:1;align-items:stretch}
+.ind{position:absolute;left:0;top:0;border-radius:14px;background:var(--paper);box-shadow:var(--raise);z-index:0;pointer-events:none}
+.nb{position:relative;z-index:1;background:none;border:0;text-align:left;padding:12px 16px;border-radius:14px;color:var(--mu);cursor:pointer;font-size:15px;letter-spacing:.03em;display:flex;gap:12px;align-items:center;transition:color .25s,background .25s}
+.nb svg{width:19px;height:19px;flex:none}
+@media(hover:hover){.nb:not(.on):hover{color:var(--tx);background:rgba(255,255,255,.5)}}
+.nb.on{color:var(--tx)}
+:focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+
+main{padding:32px 36px 48px;position:relative;z-index:1;min-width:0}
+header{display:flex;align-items:center;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+h1{margin:0;font-size:30px;font-weight:500;letter-spacing:.02em;margin-right:auto}
+
+/* status koneksi: datar, bukan tombol */
+.live{display:inline-flex;align-items:center;gap:8px;color:var(--mu);font-size:13px;padding:4px 2px}
+.live i{position:relative;width:8px;height:8px;border-radius:50%;background:var(--mu)}
+.live.ok i{background:var(--char)}
+.live.ok i::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--char);animation:ping 2s ease-out infinite}
+.live.bad i{background:var(--ember)}
+@keyframes ping{from{transform:scale(.5);opacity:.8}to{transform:scale(1.6);opacity:0}}
+
+/* ---------- elemen yang BISA DIPENCET ---------- */
+.tap{position:relative;overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;
+ background:var(--paper);border:1px solid var(--ln);border-radius:14px;box-shadow:var(--raise);
+ padding:11px 20px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ transition:translate .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,background .2s,border-color .2s}
+.tap svg{width:16px;height:16px;flex:none}
+@media(hover:hover){.tap:hover{translate:0 -2px;box-shadow:var(--raise-hi);border-color:#c9c9d0}}
+.tap.pri{background:var(--char);color:var(--ink);border-color:var(--char);box-shadow:0 2px 0 #000 inset,0 6px 16px rgba(31,31,35,.28)}
+@media(hover:hover){.tap.pri:hover{background:#34343a;box-shadow:0 10px 24px rgba(31,31,35,.32)}}
+.tap.dgr{color:var(--ember)}
+@media(hover:hover){.tap.dgr:hover{background:#fff3f2;border-color:#efb6b1}}
+.tap.sm{padding:7px 14px;font-size:13px;border-radius:12px}
+.rp{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:currentColor;opacity:.22;pointer-events:none}
+
+/* ---------- elemen yang BISA DIISI / DIPILIH (cekung) ---------- */
+select,input{background:var(--panel);border:1px solid var(--ln);border-radius:12px;padding:10px 12px;width:100%;box-shadow:var(--sink);transition:border-color .2s,background .2s}
+input:hover,select:hover{border-color:#bfc0c8}
+input:focus,select:focus{background:var(--paper);border-color:var(--char)}
+select{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%231d1d1f' stroke-width='1.8' stroke-linecap='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+ background-repeat:no-repeat;background-position:right 12px center;background-size:16px}
+header select{width:auto;min-width:240px}
+
+/* ---------- elemen INFORMASI (datar) ---------- */
 .view{display:none}.view.on{display:block}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
-.card{background:var(--p1);border-radius:28px;padding:24px;min-width:0;box-shadow:0 1px 3px rgba(30,30,40,.06);position:relative;overflow:hidden}
+.card{background:var(--paper);border-radius:28px;padding:24px;min-width:0;position:relative;overflow:hidden}
 .card:not(.tbl){min-height:420px}
-.stats{display:grid;gap:12px}
-.stats div{background:var(--p2);border-radius:20px;padding:16px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
-.stats b{font-size:28px;font-weight:600}
-.nb{transition:background .3s,color .3s}
-.card h2{margin:0;font-size:18px;font-weight:500;letter-spacing:.03em}
-.sub{color:var(--mu);font-size:13px;margin:2px 0 14px}
+.card h2{margin:0;font-size:18px;font-weight:500;letter-spacing:.02em}
+.sub{color:var(--mu);font-size:13px;margin:2px 0 14px;max-width:60ch}
 .c4{grid-column:span 4}.c5,.c7{grid-column:span 6}.c8{grid-column:span 8}.c12{grid-column:span 12}
-.hl{background:var(--hl);color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;min-height:340px}
+.stats{display:grid;gap:12px}
+.stats div{background:var(--panel);border-radius:20px;padding:16px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.stats b{font-size:28px;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* kartu suhu: satu-satunya elemen yang "menyala", intensitas mengikuti status */
+.hl{--heat:0;background:var(--char);color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;min-height:340px;isolation:isolate}
 .hl .sub{color:#a9a9b0}
-.big{font-size:56px;font-weight:600;letter-spacing:-.02em;line-height:1.05}
+.glow{position:absolute;left:-30%;right:-30%;bottom:-70%;height:130%;z-index:-1;border-radius:50%;
+ background:radial-gradient(closest-side,rgba(255,150,60,.95),rgba(217,58,47,.55) 45%,transparent 72%);
+ opacity:calc(var(--heat)*.75);transform-origin:50% 100%;transform:scale(calc(.6 + var(--heat)*.55))}
+.big{font-size:60px;font-weight:600;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums}
 .big small{font-size:24px;font-weight:400}
-.chip{display:inline-block;padding:3px 12px;border-radius:99px;font-size:12px;border:1px solid currentColor;white-space:nowrap}
-.chip.low{background:var(--yel);color:#1d1d1f;border-color:var(--yel)}
-.chip.high{background:var(--red);color:#fff;border-color:var(--red)}
-.chip.off{border-style:dashed;color:var(--mu)}
-.gauge{position:relative;height:10px;border-radius:9px;background:rgba(255,255,255,.18);margin:18px 0 8px}
-.gauge .z{position:absolute;top:0;bottom:0;background:rgba(255,255,255,.4);border-radius:9px}
-.gauge .m{position:absolute;top:-5px;width:4px;height:20px;background:var(--ink);border-radius:3px;transition:left .6s}
+.big.none{font-size:26px;font-weight:500;letter-spacing:0;color:#a9a9b0}
+.gauge{position:relative;height:10px;border-radius:9px;background:rgba(255,255,255,.16);margin:18px 0 8px}
+.gauge .z{position:absolute;top:0;bottom:0;background:rgba(255,255,255,.38);border-radius:9px}
+.gauge .m{position:absolute;top:-5px;width:4px;height:20px;background:var(--ink);border-radius:3px;box-shadow:0 0 10px rgba(255,255,255,.6)}
 .gl{display:flex;justify-content:space-between;font-size:12px;color:#a9a9b0}
+
+/* status: titik + teks, sengaja TIDAK berbentuk tombol */
+.st{display:inline-flex;align-items:center;gap:7px;font-size:13px;white-space:nowrap}
+.st i{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none}
+.st.ok i{background:var(--char)}.hl .st.ok i{background:#fff}
+.st.low i{background:var(--flame)}
+.st.high{color:var(--ember);font-weight:500}.hl .st.high{color:#ff8a7f}
+.st.high i{background:var(--ember);box-shadow:0 0 0 3px rgba(217,58,47,.2)}
+.st.off{color:var(--mu)}.st.off i{background:none;border:1.5px dashed var(--mu)}
+
 svg text{fill:var(--mu);font-family:inherit;font-size:11px}
-.tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse}
-th{font-weight:400;color:var(--mu);font-size:12px;text-align:left;padding:8px 10px}
-td{padding:12px 10px;border-top:1px solid var(--ln)}
-tr[data-id]{cursor:pointer}tr[data-id]:hover td{background:var(--p2)}
+.tw{overflow-x:auto;margin:0 -10px}
+table{width:100%;border-collapse:separate;border-spacing:0 4px}
+th{font-weight:400;color:var(--mu);font-size:12px;text-align:left;padding:6px 14px}
+td{padding:13px 14px;background:var(--panel);transition:background .2s}
+td:first-child{border-radius:14px 0 0 14px}td:last-child{border-radius:0 14px 14px 0;width:44px;text-align:right}
 td small{display:block;color:var(--mu)}
+/* baris tabel bisa dipencet: kursor tangan, panah, hover */
+tr[data-id]{cursor:pointer}
+tr[data-id] .go{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;background:var(--paper);border:1px solid var(--ln);box-shadow:var(--raise);transition:translate .25s,background .2s}
+tr[data-id] .go svg{width:14px;height:14px}
+@media(hover:hover){tr[data-id]:hover td{background:#e9e9ee}tr[data-id]:hover .go{translate:3px 0}}
+tr.cur td{background:var(--char);color:var(--ink)}tr.cur td small{color:#a9a9b0}
+tr.cur .st.ok i{background:#fff}tr.cur .st.high{color:#ff8a7f}tr.cur .go{background:var(--ember);border-color:var(--ember);color:#fff;box-shadow:none}
+tr:focus-visible{outline:none}tr:focus-visible td{box-shadow:inset 0 0 0 2px var(--ember)}
+
 .lg{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:14px;font-size:13px;color:var(--mu)}
 .lg b{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px}
 .log{list-style:none;margin:0;padding:0}
 .log li{display:flex;gap:16px;padding:11px 0;border-top:1px solid var(--ln)}
-.log time{color:var(--mu);width:72px;flex:none}
+.log li:first-child{border-top:0}
+.log time{color:var(--mu);width:72px;flex:none;font-variant-numeric:tabular-nums}
+.empty{color:var(--mu);padding:12px 0}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
 .full{grid-column:1/-1}
-.btn{background:var(--hl);color:var(--ink);border:0;border-radius:14px;padding:12px 22px;cursor:pointer;font-weight:500}
-.btn:hover{background:#3b3b41}
 .note{color:var(--mu);font-size:12px;margin-top:6px}
-code{background:var(--p2);padding:2px 7px;border-radius:7px;font-size:12px}
+code{background:var(--panel);padding:2px 7px;border-radius:7px;font-size:12px}
 .dv{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:8px}
-.dv div{background:var(--p2);border-radius:20px;padding:18px}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--tx);color:var(--ink);padding:12px 20px;border-radius:14px;opacity:0;pointer-events:none;transition:.3s;z-index:9}
+.dv>div{background:var(--panel);border-radius:20px;padding:18px}
+.dv .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);background:var(--char);color:var(--ink);padding:12px 20px;border-radius:14px;opacity:0;pointer-events:none;transition:.3s;z-index:20}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+
 @media(max-width:1180px){.c4,.c8{grid-column:span 6}}
 @media(max-width:900px){
- .shell{grid-template-columns:1fr;margin:0;border-radius:0}
- aside{position:static;height:auto;flex-direction:row;align-items:center;padding:16px;border-right:0;border-bottom:1px solid var(--ln);overflow-x:auto;gap:8px}
- .logo{margin:0 8px 0 0}nav{flex-direction:row;flex:none}.out{display:none}
- main{padding:20px 16px 32px}
+ .shell{grid-template-columns:1fr;margin:0;border-radius:0;min-height:100vh;backdrop-filter:none;background:var(--panel)}
+ /* navigasi jadi tab bar bawah, mudah dijangkau jempol */
+ aside{position:fixed;top:auto;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));height:auto;padding:6px;border:1px solid var(--ln);border-radius:20px;background:rgba(243,243,245,.92);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(30,30,40,.16)}
+ .logo{display:none}
+ nav{flex-direction:row;gap:4px}
+ .nb{flex:1;flex-direction:column;gap:3px;padding:8px 4px;font-size:11px;text-align:center}
+ main{padding:20px 16px calc(110px + env(safe-area-inset-bottom,0px))}
+ h1{font-size:26px;width:100%}
+ header{gap:10px}
+ header select{flex:1 1 100%;min-width:0}
  .c4,.c5,.c7,.c8{grid-column:span 12}.form{grid-template-columns:1fr}.card:not(.tbl){min-height:0}
- .big{font-size:46px}
+ .big{font-size:48px}
+ .bg i:nth-child(1){width:420px;height:420px;right:-200px}
 }
-@media(prefers-reduced-motion:reduce){.gauge .m,.toast{transition:none}}
+@media(prefers-reduced-motion:reduce){.toast,.tap,.nb,td{transition:none}.live.ok i::after{animation:none}}
 </style>
 </head>
 <body>
+<div class="bg" aria-hidden="true"><i data-p="-90" data-d="40"></i><i data-p="-220" data-d="-70"></i><i data-p="-40" data-d="25"></i><b data-p="-140" data-d="0"></b></div>
 <div class="shell">
- <div class="rings" aria-hidden="true"><i data-d="40"></i><i data-d="-70"></i></div>
  <aside>
   <div class="logo"><svg viewBox="0 0 32 32" fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linecap="round"><circle cx="16" cy="16" r="5"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5M7 7l3.5 3.5M21.5 21.5L25 25M25 7l-3.5 3.5M10.5 21.5L7 25"/></svg>Tungku</div>
   <nav>
-   <button class="nb on" data-v="dash">Dashboard</button>
-   <button class="nb" data-v="devs">Insinerator</button>
-   <button class="nb" data-v="set">Pengaturan</button>
+   <span class="ind" aria-hidden="true"></span>
+   <button class="nb on" data-v="dash" type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="6" height="8" rx="2"/><rect x="11" y="3" width="6" height="5" rx="2"/><rect x="11" y="10" width="6" height="7" rx="2"/><rect x="3" y="13" width="6" height="4" rx="2"/></svg>Dashboard</button>
+   <button class="nb" data-v="devs" type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 17c3.3 0 5.5-2.2 5.5-5.2 0-3.4-3-5-3.6-8.3C9.8 5 8.3 7 8.3 9 7.3 8.4 6.8 7.4 6.7 6.6 5.3 8 4.5 9.8 4.5 11.8 4.5 14.8 6.7 17 10 17z"/></svg>Insinerator</button>
+   <button class="nb" data-v="set" type="button"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 5h7M15 5h1M4 10h2M10 10h6M4 15h9M17 15h-1"/><circle cx="13" cy="5" r="2"/><circle cx="8" cy="10" r="2"/><circle cx="15" cy="15" r="2"/></svg>Pengaturan</button>
   </nav>
-  <button class="nb out" type="button">Keluar</button>
  </aside>
  <main>
   <header>
    <h1 id="ttl">Dashboard</h1>
    <select id="sel" aria-label="Pilih insinerator"></select>
-   <span class="pill" id="pill">Menghubungkan…</span>
+   <span class="live" id="pill" role="status"><i></i><span>Menghubungkan…</span></span>
   </header>
 
   <section class="view on" id="v-dash">
    <div class="grid">
     <div class="card hl c4" data-speed="0.5">
+     <span class="glow" aria-hidden="true"></span>
      <div><h2 id="hn">–</h2><p class="sub" id="hl">–</p></div>
      <div>
       <div class="big" id="ht">–</div>
@@ -125,13 +206,13 @@ code{background:var(--p2);padding:2px 7px;border-radius:7px;font-size:12px}
      <svg id="ch" viewBox="0 0 640 280" width="100%" role="img" aria-label="Grafik suhu insinerator"></svg>
     </div>
     <div class="card c12 tbl" data-speed="0.8" style="order:9">
-     <h2>Semua insinerator</h2><p class="sub">Klik baris untuk melihat grafiknya.</p>
-     <div class="tw"><table><thead><tr><th>Nama</th><th>ID perangkat</th><th>Suhu</th><th>Batas optimal</th><th>Status</th></tr></thead><tbody id="tb"></tbody></table></div>
+     <h2>Semua insinerator</h2><p class="sub">Pilih baris untuk melihat grafiknya.</p>
+     <div class="tw"><table><thead><tr><th>Nama</th><th>ID perangkat</th><th>Suhu</th><th>Batas optimal</th><th>Status</th><th><span class="sr" style="position:absolute;left:-9999px">Buka</span></th></tr></thead><tbody id="tb"></tbody></table></div>
     </div>
     <div class="card c4" data-speed="1.5">
      <h2>Waktu per zona</h2><p class="sub">Insinerator terpilih, sejak aplikasi dibuka.</p>
      <svg id="dn" viewBox="0 0 200 200" width="100%" style="max-width:220px;display:block;margin:auto" role="img" aria-label="Proporsi waktu per zona suhu"></svg>
-     <div class="lg"><span><b style="background:#1d1d1f"></b>Optimal <i id="zo"></i></span><span><b style="background:#d93a2f"></b>Terlalu panas <i id="zh"></i></span><span><b style="background:#f0d44a"></b>Kurang panas <i id="zl"></i></span></div>
+     <div class="lg"><span><b style="background:#1f1f23"></b>Optimal <i id="zo"></i></span><span><b style="background:#d93a2f"></b>Terlalu panas <i id="zh"></i></span><span><b style="background:#f0c93a"></b>Kurang panas <i id="zl"></i></span></div>
     </div>
     <div class="card c4" data-speed="0.7">
      <h2>Kejadian terakhir</h2><p class="sub">Suhu keluar batas dan perubahan status perangkat.</p>
@@ -154,7 +235,7 @@ code{background:var(--p2);padding:2px 7px;border-radius:7px;font-size:12px}
       <div class="full"><label for="fi">ID perangkat</label><input id="fi" placeholder="INS-004"><p class="note">Topik MQTT: <code id="tp">insinerator/…/suhu</code></p></div>
       <div><label for="fa">Batas bawah (°C)</label><input id="fa" type="number" value="850"></div>
       <div><label for="fb">Batas atas (°C)</label><input id="fb" type="number" value="1100"></div>
-      <div class="full"><button class="btn" id="add" type="button">Daftarkan</button></div>
+      <div class="full"><button class="tap pri" id="add" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3v10M3 8h10"/></svg>Daftarkan</button></div>
      </div>
     </div>
     <div class="card c7" data-speed="1.3">
@@ -172,13 +253,19 @@ code{background:var(--p2);padding:2px 7px;border-radius:7px;font-size:12px}
       <div class="full"><label for="ss">Insinerator</label><select id="ss"></select></div>
       <div><label for="sa">Batas bawah (°C)</label><input id="sa" type="number"></div>
       <div><label for="sb">Batas atas (°C)</label><input id="sb" type="number"></div>
-      <div class="full"><button class="btn" id="sv" type="button">Simpan batas</button></div>
+      <div class="full"><button class="tap pri" id="sv" type="button">Simpan batas</button></div>
      </div>
     </div>
     <div class="card c7" data-speed="1.3">
      <h2>Cara status dihitung</h2>
      <p class="sub">Suhu di bawah batas bawah: Kurang panas. Di antara kedua batas: Optimal. Di atas batas atas: Terlalu panas. Tanpa data lebih dari 15 detik: Offline.</p>
-     <p class="note">Nilai awal hanyalah contoh. Angka sebenarnya menunggu masukan dosen.</p>
+     <div class="stats" style="margin-top:18px">
+      <div><span class="st low"><i></i>Kurang panas</span><span class="note" style="margin:0">di bawah batas bawah</span></div>
+      <div><span class="st ok"><i></i>Optimal</span><span class="note" style="margin:0">di antara kedua batas</span></div>
+      <div><span class="st high"><i></i>Terlalu panas</span><span class="note" style="margin:0">di atas batas atas</span></div>
+      <div><span class="st off"><i></i>Offline</span><span class="note" style="margin:0">tidak ada data 15 detik</span></div>
+     </div>
+     <p class="note" style="margin-top:16px">Nilai awal hanyalah contoh. Angka sebenarnya menunggu masukan dosen.</p>
     </div>
    </div>
   </section>
@@ -188,64 +275,90 @@ code{background:var(--p2);padding:2px 7px;border-radius:7px;font-size:12px}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const fmt=n=>n.toFixed(1).replace(".",",");
 const KEY={"Kurang panas":"low","Optimal":"ok","Terlalu panas":"high"};
+const HEAT={"Offline":0,"Kurang panas":.3,"Optimal":.6,"Terlalu panas":1};
+const ARROW=`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>`;
 let devs=[],logs=[],cur=null;
 const hhmm=ts=>new Date(ts).toLocaleTimeString("id-ID");
 const status=d=>!d.on||d.t==null?"Offline":d.t<d.min?"Kurang panas":d.t>d.max?"Terlalu panas":"Optimal";
-const chip=d=>{const s=status(d);return `<span class="chip ${s==="Offline"?"off":s==="Optimal"?"":KEY[s]}">${s}</span>`};
+const chip=d=>{const s=status(d);return `<span class="st ${s==="Offline"?"off":KEY[s]}"><i></i>${s}</span>`};
 const adopt=s=>({id:s.id,name:s.name,loc:s.loc,min:s.min,max:s.max,t:s.t,on:s.online,hist:s.hist||[],z:s.zones});
 const api=async(m,u,b)=>{const r=await fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Permintaan gagal");return j};
+const live=(t,c)=>{$("#pill").className="live "+(c||"");$("#pill span").textContent=t};
 function connect(){
  const ws=new WebSocket((location.protocol==="https:"?"wss://":"ws://")+location.host+"/ws");
- ws.onopen=()=>$("#pill").textContent="Server terhubung";
- ws.onclose=()=>{$("#pill").textContent="Server terputus, mencoba lagi…";setTimeout(connect,2000)};
+ ws.onopen=()=>live("Server terhubung","ok");
+ ws.onclose=()=>{live("Server terputus, mencoba lagi…","bad");setTimeout(connect,2000)};
  ws.onmessage=e=>{const m=JSON.parse(e.data);
   if(m.type==="snapshot"){devs=m.devices.map(adopt);logs=m.events.map(v=>({t:hhmm(v.ts),m:v.msg}));
    if(!devs.some(x=>x.id===cur))cur=devs[0]?devs[0].id:null;
-   $("#pill").textContent=m.mqtt?"Server dan MQTT terhubung":"Server terhubung, MQTT belum";opts();render()}
+   m.mqtt?live("Server dan MQTT terhubung","ok"):live("Server terhubung, MQTT belum","bad");opts();render()}
   else if(m.type==="reading"){const d=devs.find(x=>x.id===m.id);if(d){d.t=m.t;d.on=true;d.z=m.zones;d.hist.push(m.t);if(d.hist.length>60)d.hist.shift();render()}}
   else if(m.type==="device"){const n=adopt(m.device),i=devs.findIndex(x=>x.id===n.id);if(i<0)devs.push(n);else devs[i]=n;if(!cur)cur=n.id;opts();render()}
   else if(m.type==="remove"){devs=devs.filter(x=>x.id!==m.id);if(cur===m.id)cur=devs[0]?devs[0].id:null;opts();render()}
   else if(m.type==="event"){logs.unshift({t:hhmm(m.ts),m:m.msg});if(logs.length>5)logs.pop();render()}};
 }
 
+const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+/* angka suhu berhitung naik/turun, kartu menyala sesuai status */
+const tv={v:NaN,id:null,to:null};let flick=null;
+function heroTemp(d){
+ const el=$("#ht"),paint=()=>el.innerHTML=`${fmt(tv.v)}<small>°C</small>`;
+ el.classList.toggle("none",d.t==null);
+ if(d.t==null){gsap.killTweensOf(tv);tv.v=NaN;tv.to=null;tv.id=d.id;el.textContent="Tidak ada data";return}
+ if(calm||!Number.isFinite(tv.v)){tv.v=d.t;tv.to=d.t;tv.id=d.id;paint();return}
+ if(tv.to===d.t&&tv.id===d.id)return;
+ tv.to=d.t;tv.id=d.id;gsap.to(tv,{v:d.t,duration:.9,ease:"power2.out",onUpdate:paint,overwrite:true});
+}
+function heat(s){
+ const h=HEAT[s],hl=$(".hl"),g=$(".glow");
+ calm?hl.style.setProperty("--heat",h):gsap.to(hl,{"--heat":h,duration:1.2,ease:"power2.out"});
+ if(calm)return;
+ if(s==="Terlalu panas"&&!flick)flick=gsap.to(g,{scaleY:1.12,scaleX:.96,duration:.55,repeat:-1,yoyo:true,ease:"sine.inOut"});
+ if(s!=="Terlalu panas"&&flick){flick.kill();flick=null;gsap.to(g,{scaleX:1,scaleY:1,duration:.4})}
+}
+
 function render(){
  const d=devs.find(x=>x.id===cur)||devs[0];
- if(!d){$("#hn").textContent="Belum ada insinerator";$("#hl").textContent="Daftarkan di menu Insinerator";$("#ht").textContent="–";$("#hs").innerHTML="";$("#tb").innerHTML="";$("#lg").innerHTML="";stats();return}
+ if(!d){$("#hn").textContent="Belum ada insinerator";$("#hl").textContent="Daftarkan di menu Insinerator";$("#ht").textContent="–";$("#hs").innerHTML="";$("#tb").innerHTML="";$("#lg").innerHTML="";heat("Offline");stats();return}
  $("#hn").textContent=d.name;$("#hl").textContent=`${d.loc}, ${d.id}`;
- $("#ht").innerHTML=d.t==null?"Tidak ada data":`${fmt(d.t)}<small>°C</small>`;
- $("#hs").innerHTML=chip(d);
+ heroTemp(d);$("#hs").innerHTML=chip(d);heat(status(d));
  const lo=d.min-150,hi=d.max+150,p=v=>Math.max(0,Math.min(100,(v-lo)/(hi-lo)*100));
  $("#gz").style.cssText=`left:${p(d.min)}%;width:${p(d.max)-p(d.min)}%`;
- $("#gm").style.left=d.t==null?"0%":`calc(${p(d.t)}% - 2px)`;$("#gm").style.opacity=d.t==null?0:1;
+ const gm={left:d.t==null?"0%":`calc(${p(d.t)}% - 2px)`,opacity:d.t==null?0:1};
+ calm?gsap.set("#gm",gm):gsap.to("#gm",{...gm,duration:.9,ease:"elastic.out(1,.6)",overwrite:true});
  $("#g1").textContent=`Batas bawah ${d.min}°C`;$("#g2").textContent=`Batas atas ${d.max}°C`;
  chart(d);donut(d);stats();
- $("#tb").innerHTML=devs.map(x=>`<tr data-id="${x.id}" tabindex="0"><td>${x.name}<small>${x.loc}</small></td><td>${x.id}</td><td>${x.t==null?"–":fmt(x.t)+"°C"}</td><td>${x.min} sampai ${x.max}°C</td><td>${chip(x)}</td></tr>`).join("");
- $("#lg").innerHTML=logs.map(l=>`<li><time>${l.t}</time><span>${l.m}</span></li>`).join("");
+ $("#tb").innerHTML=devs.map(x=>`<tr data-id="${x.id}" tabindex="0" class="${x.id===d.id?"cur":""}" aria-current="${x.id===d.id}"><td>${x.name}<small>${x.loc}</small></td><td>${x.id}</td><td>${x.t==null?"–":fmt(x.t)+"°C"}</td><td>${x.min} sampai ${x.max}°C</td><td>${chip(x)}</td><td><span class="go">${ARROW}</span></td></tr>`).join("");
+ $("#lg").innerHTML=logs.length?logs.map(l=>`<li><time>${l.t}</time><span>${l.m}</span></li>`).join(""):`<li class="empty">Belum ada kejadian.</li>`;
 }
 function stats(){
  const on=devs.filter(x=>x.on),ok=on.filter(x=>status(x)==="Optimal").length,bad=on.length-ok;
- $("#st").innerHTML=`<div><span>Perangkat online</span><b>${on.length}/${devs.length}</b></div><div><span>Dalam rentang optimal</span><b>${ok}</b></div><div><span>Perlu perhatian</span><b${bad?' style="color:var(--red)"':""}>${bad}</b></div>`;
+ $("#st").innerHTML=`<div><span>Perangkat online</span><b>${on.length}/${devs.length}</b></div><div><span>Dalam rentang optimal</span><b>${ok}</b></div><div><span>Perlu perhatian</span><b${bad?' style="color:var(--ember)"':""}>${bad}</b></div>`;
 }
 function chart(d){
  const W=640,H=280,L=48,svg=$("#ch");
  if(!d.hist.length){svg.innerHTML=`<text x="320" y="140" text-anchor="middle" style="font-size:14px">Perangkat offline, belum ada data.</text>`;return}
  const lo=Math.min(d.min,...d.hist)-60,hi=Math.max(d.max,...d.hist)+60,y=v=>H-24-(v-lo)/(hi-lo)*(H-40);
  const n=d.hist.length,x=i=>L+(60-n+i)*(W-L-10)/59;
- let g="";
+ let g=`<defs><linearGradient id="fa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f1f23" stop-opacity=".14"/><stop offset="1" stop-color="#1f1f23" stop-opacity="0"/></linearGradient></defs>`;
  for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;g+=`<line x1="${L}" x2="${W-10}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e4e8" stroke-width=".8"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${Math.round(v)}</text>`}
- g+=`<rect x="${L}" y="${y(d.max)}" width="${W-L-10}" height="${y(d.min)-y(d.max)}" fill="#1d1d1f" opacity=".06"/>`;
+ g+=`<rect x="${L}" y="${y(d.max)}" width="${W-L-10}" height="${y(d.min)-y(d.max)}" fill="#1f1f23" opacity=".05"/>`;
  g+=`<line x1="${L}" x2="${W-10}" y1="${y(d.max)}" y2="${y(d.max)}" stroke="#8e8e97" stroke-dasharray="4 4"/><line x1="${L}" x2="${W-10}" y1="${y(d.min)}" y2="${y(d.min)}" stroke="#8e8e97" stroke-dasharray="4 4"/>`;
- g+=`<polyline fill="none" stroke="#1d1d1f" stroke-width="2.4" stroke-linejoin="round" points="${d.hist.map((v,i)=>x(i)+","+y(v)).join(" ")}"/>`;
- g+=`<circle cx="${x(n-1)}" cy="${y(d.hist[n-1])}" r="5" fill="#d93a2f"/>`;
+ const pts=d.hist.map((v,i)=>x(i)+","+y(v));
+ g+=`<polygon fill="url(#fa)" points="${x(0)},${H-24} ${pts.join(" ")} ${x(n-1)},${H-24}"/>`;
+ g+=`<polyline fill="none" stroke="#1f1f23" stroke-width="2.4" stroke-linejoin="round" points="${pts.join(" ")}"/>`;
+ g+=`<circle cx="${x(n-1)}" cy="${y(d.hist[n-1])}" r="11" fill="#d93a2f" opacity=".18"/><circle cx="${x(n-1)}" cy="${y(d.hist[n-1])}" r="5" fill="#d93a2f"/>`;
  svg.innerHTML=g;
 }
 function donut(d){
  const z=d.z,tot=z.low+z.ok+z.high||1,R=70,C=2*Math.PI*R;let off=0,s=`<g transform="rotate(-90 100 100)">`;
- [["ok","#1d1d1f"],["high","#d93a2f"],["low","#f0d44a"]].forEach(([k,c])=>{const f=z[k]/tot*C;s+=`<circle cx="100" cy="100" r="${R}" fill="none" stroke="${c}" stroke-width="22" stroke-dasharray="${f} ${C-f}" stroke-dashoffset="${-off}"/>`;off+=f});
+ [["ok","#1f1f23"],["high","#d93a2f"],["low","#f0c93a"]].forEach(([k,c])=>{const f=z[k]/tot*C;s+=`<circle cx="100" cy="100" r="${R}" fill="none" stroke="${c}" stroke-width="22" stroke-dasharray="${f} ${C-f}" stroke-dashoffset="${-off}"/>`;off+=f});
  s+=`</g><text x="100" y="106" text-anchor="middle" style="font-size:22px;fill:#1d1d1f;font-weight:500">${Math.round(z.ok/tot*100)}%</text><text x="100" y="124" text-anchor="middle">optimal</text>`;
  $("#dn").innerHTML=s;
  $("#zo").textContent=Math.round(z.ok/tot*100)+"%";$("#zh").textContent=Math.round(z.high/tot*100)+"%";$("#zl").textContent=Math.round(z.low/tot*100)+"%";
@@ -254,71 +367,111 @@ function opts(){
  const h=devs.map(d=>`<option value="${d.id}">${d.name}</option>`).join("");
  $("#sel").innerHTML=h;$("#sel").value=cur;$("#ss").innerHTML=h;$("#ss").value=cur;fillSet();
  $("#dc").textContent=`${devs.length} alat terdaftar`;
- $("#dl").innerHTML=devs.map(d=>`<div><b>${d.name}</b><p class="sub" style="margin:2px 0 10px">${d.loc}</p>${chip(d)}<p class="note">ID <code>${d.id}</code><br>Topik <code>insinerator/${d.id}/suhu</code><br>Batas ${d.min} sampai ${d.max}°C</p><button class="nb" data-del="${d.id}" type="button" style="border:1px solid var(--ln);padding:6px 14px;margin-top:10px">Hapus</button></div>`).join("");
+ $("#dl").innerHTML=devs.length?devs.map(d=>`<div><b>${d.name}</b><p class="sub" style="margin:2px 0 10px">${d.loc}</p>${chip(d)}<p class="note">ID <code>${d.id}</code><br>Topik <code>insinerator/${d.id}/suhu</code><br>Batas ${d.min} sampai ${d.max}°C</p><div class="acts"><button class="tap sm" data-open="${d.id}" type="button">Lihat grafik ${ARROW}</button><button class="tap sm dgr" data-del="${d.id}" type="button">Hapus</button></div></div>`).join(""):`<p class="empty">Belum ada alat. Isi formulir di samping untuk mendaftarkan yang pertama.</p>`;
 }
 function fillSet(){const d=devs.find(x=>x.id===$("#ss").value);if(d){$("#sa").value=d.min;$("#sb").value=d.max}}
 function toast(t){const e=$("#ts");e.textContent=t;e.classList.add("on");clearTimeout(toast.k);toast.k=setTimeout(()=>e.classList.remove("on"),2600)}
 
-/* animasi */
-const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
+/* ---------- smooth scroll (Lenis) + ScrollTrigger ---------- */
 gsap.registerPlugin(ScrollTrigger);
-function motion(){
- ScrollTrigger.getAll().forEach(t=>t.kill());
+let lenis=null;
+if(!calm&&window.Lenis){
+ lenis=new Lenis({lerp:.09,wheelMultiplier:.9});
+ lenis.on("scroll",ScrollTrigger.update);
+ gsap.ticker.add(t=>lenis.raf(t*1000));gsap.ticker.lagSmoothing(0);
+}
+const toTop=()=>lenis?lenis.scrollTo(0,{immediate:true}):scrollTo(0,0);
+
+/* parallax latar: tiap lapisan bergerak dengan kecepatan berbeda saat scroll */
+if(!calm)$$(".bg [data-p]").forEach(el=>gsap.to(el,{y:+el.dataset.p,ease:"none",scrollTrigger:{trigger:document.body,start:"top top",end:"bottom bottom",scrub:1}}));
+/* latar ikut kursor sedikit (mouse saja) */
+if(!calm)addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
+ $$(".bg [data-d]").forEach(el=>gsap.to(el,{x:x*el.dataset.d,rotation:y*(+el.dataset.d)/12,duration:1.4,ease:"power3.out",overwrite:"auto"}))});
+
+let pTriggers=[];
+function motion(first){
+ pTriggers.forEach(t=>t.kill());pTriggers=[];
  const v=$$(".view.on [data-speed]");
  if(calm)return;
- gsap.from(v,{opacity:0,scale:.95,clipPath:"inset(0% 0% 100% 0% round 28px)",duration:.9,stagger:.1,ease:"power3.out",clearProps:"opacity,scale,clipPath"});
- gsap.from(".view.on .dv>div,.view.on .form>div",{opacity:0,x:-18,duration:.5,stagger:.05,delay:.4,ease:"power2.out",clearProps:"opacity,x"});
- v.forEach(el=>{const s=+el.dataset.speed;gsap.fromTo(el.children,{y:-12*s},{y:12*s,ease:"none",scrollTrigger:{trigger:el,start:"top bottom",end:"bottom top",scrub:.7}})});
+ const tl=gsap.timeline();
+ if(first)tl.from(".logo,.nb",{opacity:0,x:-16,duration:.5,stagger:.06,ease:"power3.out",clearProps:"opacity,x"})
+  .from("header>*",{opacity:0,y:-10,duration:.5,stagger:.06,ease:"power3.out",clearProps:"opacity,y"},"<.1");
+ tl.from(v,{opacity:0,y:30,clipPath:"inset(0% 0% 100% 0% round 28px)",duration:.9,stagger:.08,ease:"power3.out",clearProps:"opacity,y,clipPath"},first?"<.15":0)
+  .from(".view.on .dv>div,.view.on .form>div",{opacity:0,x:-14,duration:.45,stagger:.04,ease:"power2.out",clearProps:"opacity,x"},"<.3");
+ /* parallax isi kartu: kecepatan berbeda per kartu */
+ v.forEach(el=>{const s=+el.dataset.speed,t=gsap.fromTo([...el.children].filter(c=>!c.classList.contains("glow")),{y:-8*s},{y:8*s,ease:"none",scrollTrigger:{trigger:el,start:"top bottom",end:"bottom top",scrub:.6}});pTriggers.push(t.scrollTrigger)});
  ScrollTrigger.refresh();
 }
-if(!calm)addEventListener("pointermove",e=>{const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
- gsap.to(".rings i",{x:(i,el)=>x*el.dataset.d,y:(i,el)=>y*el.dataset.d,duration:1.4,ease:"power3.out"})});
 
-/* hover kartu: hanya naik, tanpa miring */
-if(!calm)$$(".card").forEach(c=>{
- const mouse=e=>e.pointerType==="mouse";
- c.addEventListener("pointerenter",e=>{if(!mouse(e)||c.matches(":focus-within"))return;gsap.to(c,{y:-8,boxShadow:"0 22px 46px rgba(30,30,40,.16)",duration:.4,ease:"power3.out",overwrite:"auto"})});
- c.addEventListener("pointerleave",()=>gsap.to(c,{y:0,boxShadow:"0 1px 3px rgba(30,30,40,.06)",duration:.5,ease:"power3.out",overwrite:"auto"}));
- c.addEventListener("focusin",()=>gsap.to(c,{y:0,duration:.3,overwrite:"auto"}));
-});
+/* ---------- umpan balik sentuhan untuk elemen yang bisa dipencet ---------- */
+function press(el,e){
+ if(calm)return;
+ if(e.pointerType==="touch"&&navigator.vibrate)navigator.vibrate(8);
+ gsap.to(el,{scale:.95,duration:.12,ease:"power2.out",overwrite:"auto"});
+ if(el.classList.contains("tap")){
+  const r=el.getBoundingClientRect(),rp=document.createElement("span");rp.className="rp";
+  rp.style.left=(e.clientX-r.left)+"px";rp.style.top=(e.clientY-r.top)+"px";el.appendChild(rp);
+  gsap.to(rp,{scale:Math.max(r.width,r.height)/8,opacity:0,duration:.6,ease:"power2.out",onComplete:()=>rp.remove()});
+ }
+}
+function release(el){if(!calm)gsap.to(el,{scale:1,duration:.5,ease:"back.out(3)",overwrite:"auto"})}
+document.addEventListener("pointerdown",e=>{const el=e.target.closest(".tap,.nb");if(el)press(el,e);
+ const row=e.target.closest("tr[data-id]");if(row&&!calm)gsap.fromTo(row.cells,{scale:.985},{scale:1,duration:.4,ease:"back.out(3)"})});
+["pointerup","pointerleave","pointercancel"].forEach(t=>document.addEventListener(t,e=>{const el=e.target.closest&&e.target.closest(".tap,.nb");if(el)release(el)},true));
 
-/* navigasi */
+/* tombol utama sedikit "menarik" kursor (mouse saja) */
+if(!calm)document.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;
+ $$(".view.on .tap.pri").forEach(b=>{const r=b.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,dx=e.clientX-cx,dy=e.clientY-cy,near=Math.hypot(dx,dy)<120;
+  gsap.to(b,{x:near?dx*.15:0,y:near?dy*.25:0,duration:.5,ease:"power3.out"})})});
+
+/* ---------- navigasi + indikator yang meluncur ---------- */
+function slideInd(b,instant){
+ const i=$(".ind"),box={x:b.offsetLeft,y:b.offsetTop,width:b.offsetWidth,height:b.offsetHeight};
+ instant||calm?gsap.set(i,box):gsap.to(i,{...box,duration:.55,ease:"elastic.out(1,.75)"});
+}
 const T={dash:"Dashboard",devs:"Insinerator",set:"Pengaturan"};
 let busy=false;
-$$(".nb[data-v]").forEach(b=>b.onclick=()=>{
- const id="v-"+b.dataset.v,old=$(".view.on");
+function goView(key){
+ const b=$(`.nb[data-v="${key}"]`),id="v-"+key,old=$(".view.on");
  if(busy||old.id===id)return;
- $$(".nb").forEach(x=>x.classList.toggle("on",x===b));
+ $$(".nb").forEach(x=>x.classList.toggle("on",x===b));slideInd(b);
  const go=()=>{
   $$(".view").forEach(x=>x.classList.toggle("on",x.id===id));
-  $("#ttl").textContent=T[b.dataset.v];$("#sel").style.display=b.dataset.v==="dash"?"":"none";
-  scrollTo(0,0);motion();
+  $("#ttl").textContent=T[key];$("#sel").style.display=key==="dash"?"":"none";
+  toTop();motion();
   if(!calm)gsap.fromTo("#ttl",{opacity:0,x:28},{opacity:1,x:0,duration:.6,ease:"power3.out"});
  };
  if(calm){go();return}
  busy=true;
- gsap.fromTo(b,{scale:.9},{scale:1,duration:.55,ease:"back.out(3)"});
  gsap.to("#ttl",{opacity:0,x:-20,duration:.2});
  const oc=old.querySelectorAll(".card");
- gsap.to(oc,{opacity:0,scale:.95,duration:.22,stagger:.03,ease:"power1.in",onComplete:()=>{gsap.set(oc,{clearProps:"opacity,scale"});go();busy=false}});
-});
-$("#sel").onchange=e=>{cur=e.target.value;render()};
-$("#tb").onclick=e=>{const r=e.target.closest("tr");if(r){cur=r.dataset.id;$("#sel").value=cur;render()}};
-$("#tb").onkeydown=e=>{if(e.key==="Enter")e.target.click()};
+ gsap.to(oc,{opacity:0,y:-14,duration:.22,stagger:.03,ease:"power1.in",onComplete:()=>{gsap.set(oc,{clearProps:"opacity,y"});go();busy=false}});
+}
+$$(".nb[data-v]").forEach(b=>b.onclick=()=>goView(b.dataset.v));
+addEventListener("resize",()=>slideInd($(".nb.on"),true));
+
+function pick(id){cur=id;$("#sel").value=cur;render();
+ if(!calm)gsap.fromTo(".hl",{scale:.97},{scale:1,duration:.6,ease:"back.out(2.5)"})}
+$("#sel").onchange=e=>pick(e.target.value);
+$("#tb").onclick=e=>{const r=e.target.closest("tr[data-id]");if(r)pick(r.dataset.id)};
+$("#tb").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();e.target.click()}};
 $("#ss").onchange=fillSet;
 $("#fi").oninput=e=>$("#tp").textContent=`insinerator/${e.target.value||"…"}/suhu`;
+const shake=el=>!calm&&gsap.fromTo(el,{x:-6},{x:0,duration:.5,ease:"elastic.out(1.2,.3)"});
 $("#sv").onclick=async()=>{const id=$("#ss").value,a=+$("#sa").value,b=+$("#sb").value;
- if(!id)return;if(!(a<b))return toast("Batas bawah harus lebih kecil dari batas atas");
- try{await api("PUT","/api/devices/"+id,{min:a,max:b});toast("Batas suhu disimpan")}catch(e){toast(e.message)}};
+ if(!id)return;if(!(a<b)){shake("#sv");return toast("Batas bawah harus lebih kecil dari batas atas")}
+ try{await api("PUT","/api/devices/"+id,{min:a,max:b});toast("Batas suhu disimpan")}catch(e){shake("#sv");toast(e.message)}};
 $("#add").onclick=async()=>{const n=$("#fn").value.trim(),l=$("#fl").value.trim(),i=$("#fi").value.trim().toUpperCase(),a=+$("#fa").value,b=+$("#fb").value;
- if(!n||!i)return toast("Isi nama dan ID perangkat");
- if(!(a<b))return toast("Batas bawah harus lebih kecil dari batas atas");
+ if(!n||!i){shake("#add");return toast("Isi nama dan ID perangkat")}
+ if(!(a<b)){shake("#add");return toast("Batas bawah harus lebih kecil dari batas atas")}
  try{await api("POST","/api/devices",{id:i,name:n,loc:l,min:a,max:b});
-  ["#fn","#fl","#fi"].forEach(x=>$(x).value="");$("#tp").textContent="insinerator/…/suhu";toast("Terdaftar. Menunggu data pertama dari alat…")}catch(e){toast(e.message)}};
-$("#dl").onclick=async e=>{const b=e.target.closest("[data-del]");if(!b||!confirm("Hapus "+b.dataset.del+"?"))return;
+  ["#fn","#fl","#fi"].forEach(x=>$(x).value="");$("#tp").textContent="insinerator/…/suhu";toast("Terdaftar. Menunggu data pertama dari alat…")}catch(e){shake("#add");toast(e.message)}};
+$("#dl").onclick=async e=>{
+ const o=e.target.closest("[data-open]");if(o){cur=o.dataset.open;goView("dash");setTimeout(()=>{$("#sel").value=cur;render()},calm?0:260);return}
+ const b=e.target.closest("[data-del]");if(!b||!confirm("Hapus "+b.dataset.del+"?"))return;
  try{await api("DELETE","/api/devices/"+b.dataset.del);toast("Insinerator dihapus")}catch(x){toast(x.message)}};
 
-opts();render();motion();connect();
+opts();render();slideInd($(".nb.on"),true);motion(true);connect();
 </script>
 </body>
 </html>
