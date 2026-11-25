@@ -1,0 +1,9 @@
+# Vercel hanya menyajikan public/ sebagai situs statis (mode demo).
+# Server Node, firmware dan broker butuh hosting yang selalu menyala.
+server.js
+simulator.js
+firmware
+mosquitto
+docker-compose.yml
+data
+.env

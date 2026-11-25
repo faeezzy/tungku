@@ -287,20 +287,62 @@ const hhmm=ts=>new Date(ts).toLocaleTimeString("id-ID");
 const status=d=>!d.on||d.t==null?"Offline":d.t<d.min?"Kurang panas":d.t>d.max?"Terlalu panas":"Optimal";
 const chip=d=>{const s=status(d);return `<span class="st ${s==="Offline"?"off":KEY[s]}"><i></i>${s}</span>`};
 const adopt=s=>({id:s.id,name:s.name,loc:s.loc,min:s.min,max:s.max,t:s.t,on:s.online,hist:s.hist||[],z:s.zones});
-const api=async(m,u,b)=>{const r=await fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Permintaan gagal");return j};
+const api=async(m,u,b)=>{if(demo)return demoApi(m,u,b);const r=await fetch(u,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"Permintaan gagal");return j};
 const live=(t,c)=>{$("#pill").className="live "+(c||"");$("#pill span").textContent=t};
+/* koneksi ke server asli; jika server tidak pernah bisa dihubungi (mis. hosting statis), pindah ke mode demo */
+let demo=false,everOpen=false;
 function connect(){
+ if(demo)return;
  const ws=new WebSocket((location.protocol==="https:"?"wss://":"ws://")+location.host+"/ws");
- ws.onopen=()=>live("Server terhubung","ok");
- ws.onclose=()=>{live("Server terputus, mencoba lagi…","bad");setTimeout(connect,2000)};
- ws.onmessage=e=>{const m=JSON.parse(e.data);
+ ws.onopen=()=>{everOpen=true;live("Server terhubung","ok")};
+ ws.onclose=()=>{if(!everOpen)return startDemo();live("Server terputus, mencoba lagi…","bad");setTimeout(connect,2000)};
+ ws.onmessage=e=>handle(JSON.parse(e.data));
+}
+function handle(m){
   if(m.type==="snapshot"){devs=m.devices.map(adopt);logs=m.events.map(v=>({t:hhmm(v.ts),m:v.msg}));
    if(!devs.some(x=>x.id===cur))cur=devs[0]?devs[0].id:null;
-   m.mqtt?live("Server dan MQTT terhubung","ok"):live("Server terhubung, MQTT belum","bad");opts();render()}
+   demo?live("Mode demo, data simulasi","ok"):m.mqtt?live("Server dan MQTT terhubung","ok"):live("Server terhubung, MQTT belum","bad");opts();render()}
   else if(m.type==="reading"){const d=devs.find(x=>x.id===m.id);if(d){d.t=m.t;d.on=true;d.z=m.zones;d.hist.push(m.t);if(d.hist.length>60)d.hist.shift();render()}}
   else if(m.type==="device"){const n=adopt(m.device),i=devs.findIndex(x=>x.id===n.id);if(i<0)devs.push(n);else devs[i]=n;if(!cur)cur=n.id;opts();render()}
   else if(m.type==="remove"){devs=devs.filter(x=>x.id!==m.id);if(cur===m.id)cur=devs[0]?devs[0].id:null;opts();render()}
-  else if(m.type==="event"){logs.unshift({t:hhmm(m.ts),m:m.msg});if(logs.length>5)logs.pop();render()}};
+  else if(m.type==="event"){logs.unshift({t:hhmm(m.ts),m:m.msg});if(logs.length>5)logs.pop();render()}
+}
+
+/* ---------- mode demo: meniru server.js di browser ---------- */
+const sim={};
+const simStatus=s=>s.t<s.min?"Kurang panas":s.t>s.max?"Terlalu panas":"Optimal";
+const simPub=s=>({id:s.id,name:s.name,loc:s.loc,min:s.min,max:s.max,t:s.t,online:true,zones:{...s.zones},hist:s.hist.slice(-60)});
+function simStep(s){
+ if(Math.random()<.07)s.tg=s.min+(s.max-s.min)*(s.bias+(Math.random()-.5)*1.1);
+ s.t=Math.round((s.t+(s.tg-s.t)*.18+(Math.random()-.5)*8)*10)/10;
+ s.zones[KEY[simStatus(s)]]++;s.hist.push(s.t);if(s.hist.length>60)s.hist.shift();
+}
+function simMake(id,name,loc,min,max,bias){
+ const s={id,name,loc,min,max,bias,zones:{low:0,ok:0,high:0},hist:[]};
+ s.t=s.tg=min+(max-min)*bias;for(let i=0;i<40;i++)simStep(s);s.last=simStatus(s);
+ return sim[id]=s;
+}
+function startDemo(){
+ if(demo)return;demo=true;
+ const seed=[["INS-001","Insinerator RS Harapan","Bekasi",850,1100,.5],["INS-002","TPS3R Sukamaju","Bogor",800,1000,.35],["INS-003","Puskesmas Cilandak","Jakarta Selatan",850,1050,.9]];
+ handle({type:"snapshot",mqtt:true,devices:seed.map(a=>simPub(simMake(...a))),events:[{ts:Date.now(),msg:"Mode demo: data di halaman ini adalah simulasi"}]});
+ setInterval(()=>Object.values(sim).forEach(s=>{
+  simStep(s);const st=simStatus(s);
+  if(st!==s.last){handle({type:"event",ts:Date.now(),msg:`${s.name}: ${st==="Optimal"?"suhu kembali optimal":"suhu "+st.toLowerCase()}`});s.last=st}
+  handle({type:"reading",id:s.id,t:s.t,zones:{...s.zones}});
+ }),2000);
+}
+async function demoApi(m,u,b){
+ const id=decodeURIComponent(u.split("/")[3]||"");
+ if(m==="POST"){
+  if(!/^[A-Za-z0-9_-]{2,32}$/.test(b.id))throw new Error("ID hanya huruf, angka, - dan _ (2 sampai 32 karakter)");
+  if(sim[b.id])throw new Error("ID perangkat sudah terdaftar");
+  const s=simMake(b.id,b.name,b.loc||"–",b.min,b.max,.5);
+  handle({type:"device",device:simPub(s)});handle({type:"event",ts:Date.now(),msg:`${s.name}: didaftarkan`});return simPub(s);
+ }
+ const s=sim[id];if(!s)throw new Error("Tidak ditemukan");
+ if(m==="PUT"){s.min=b.min;s.max=b.max;handle({type:"device",device:simPub(s)});return simPub(s)}
+ if(m==="DELETE"){delete sim[id];handle({type:"remove",id});return{ok:true}}
 }
 
 const calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
@@ -346,12 +388,12 @@ function chart(d){
  if(!d.hist.length){svg.innerHTML=`<text x="320" y="140" text-anchor="middle" style="font-size:14px">Perangkat offline, belum ada data.</text>`;return}
  const lo=Math.min(d.min,...d.hist)-60,hi=Math.max(d.max,...d.hist)+60,y=v=>H-24-(v-lo)/(hi-lo)*(H-40);
  const n=d.hist.length,x=i=>L+(60-n+i)*(W-L-10)/59;
- let g=`<defs><linearGradient id="fa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f1f23" stop-opacity=".14"/><stop offset="1" stop-color="#1f1f23" stop-opacity="0"/></linearGradient></defs>`;
+ let g=`<defs><linearGradient id="chfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f1f23" stop-opacity=".14"/><stop offset="1" stop-color="#1f1f23" stop-opacity="0"/></linearGradient></defs>`;
  for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;g+=`<line x1="${L}" x2="${W-10}" y1="${y(v)}" y2="${y(v)}" stroke="#e4e4e8" stroke-width=".8"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${Math.round(v)}</text>`}
  g+=`<rect x="${L}" y="${y(d.max)}" width="${W-L-10}" height="${y(d.min)-y(d.max)}" fill="#1f1f23" opacity=".05"/>`;
  g+=`<line x1="${L}" x2="${W-10}" y1="${y(d.max)}" y2="${y(d.max)}" stroke="#8e8e97" stroke-dasharray="4 4"/><line x1="${L}" x2="${W-10}" y1="${y(d.min)}" y2="${y(d.min)}" stroke="#8e8e97" stroke-dasharray="4 4"/>`;
  const pts=d.hist.map((v,i)=>x(i)+","+y(v));
- g+=`<polygon fill="url(#fa)" points="${x(0)},${H-24} ${pts.join(" ")} ${x(n-1)},${H-24}"/>`;
+ g+=`<polygon fill="url(#chfill)" points="${x(0)},${H-24} ${pts.join(" ")} ${x(n-1)},${H-24}"/>`;
  g+=`<polyline fill="none" stroke="#1f1f23" stroke-width="2.4" stroke-linejoin="round" points="${pts.join(" ")}"/>`;
  g+=`<circle cx="${x(n-1)}" cy="${y(d.hist[n-1])}" r="11" fill="#d93a2f" opacity=".18"/><circle cx="${x(n-1)}" cy="${y(d.hist[n-1])}" r="5" fill="#d93a2f"/>`;
  svg.innerHTML=g;
@@ -471,7 +513,8 @@ $("#dl").onclick=async e=>{
  const b=e.target.closest("[data-del]");if(!b||!confirm("Hapus "+b.dataset.del+"?"))return;
  try{await api("DELETE","/api/devices/"+b.dataset.del);toast("Insinerator dihapus")}catch(x){toast(x.message)}};
 
-opts();render();slideInd($(".nb.on"),true);motion(true);connect();
+opts();render();slideInd($(".nb.on"),true);motion(true);
+new URLSearchParams(location.search).has("demo")?startDemo():connect();
 </script>
 </body>
 </html>
